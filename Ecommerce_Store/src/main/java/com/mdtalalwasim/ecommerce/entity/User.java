@@ -3,13 +3,10 @@ package com.mdtalalwasim.ecommerce.entity;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,13 +44,16 @@ public class User {
 	private String profileImage;
 	
 	private String role;
-	
-	private Boolean isEnable;
+
+    @Column(nullable = false)
+	private Boolean isEnable = true;
 	
 	//implement user account lock for wrong password
-	private Boolean accountStatusNonLocked;
-	
-	private Integer accountfailedAttemptCount;
+    @Column(nullable = false)
+	private Boolean accountStatusNonLocked = true;
+
+    @Column(nullable = false)
+	private Integer accountfailedAttemptCount=0;
 	
 	private Date accountLockTime;
 	
@@ -64,8 +64,8 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-	
-	
+
+
 	
 	
 }

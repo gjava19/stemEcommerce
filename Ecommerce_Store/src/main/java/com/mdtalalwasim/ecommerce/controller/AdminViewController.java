@@ -92,8 +92,12 @@ public class AdminViewController {
 	@PostMapping("/save-category")
 	public String saveCategory(@ModelAttribute Category category, @RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
 		
-		String imageName = file !=null ? file.getOriginalFilename() : "default.jpg";
-		category.setCategoryImage(imageName);
+		//String imageName = file !=null ? file.getOriginalFilename() : "default.jpg";
+        String imageName = (file != null && !file.isEmpty())
+                ? file.getOriginalFilename()
+                : "default.jpg";
+
+        category.setCategoryImage(imageName);
 		
 		if(categoryService.existCategory(category.getCategoryName())) {
 			session.setAttribute("errorMsg", "Category Name already Exists");
