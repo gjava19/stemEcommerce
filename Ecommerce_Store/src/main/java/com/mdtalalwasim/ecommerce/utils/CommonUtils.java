@@ -22,13 +22,15 @@ public class CommonUtils {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper messagehelper = new MimeMessageHelper(message);
 		
-		messagehelper.setFrom("myplacementjourney@gmail.com", "RED WINGS");
+		messagehelper.setFrom("robotuni.robotuni@gmail.com", "robotuni");
 		messagehelper.setTo(reciepentEmail);
 		
-		String content = "<p>Hello, </p>" + "<p> You have requested to reset your password. </p> "
-						 + "<p>Please Click the link to change your password:</p>"+ "<p><a href=\""+ url + "\">Change my password</a></p>";
+		String content = "<p>Hello,</p>"
+                         + "<p> You have requested to reset your password.</p> "
+						 + "<p>Please Click the link to change your password:</p>"+
+                           "<p><a href=\""+ url + "\">Change my password</a></p>";
 							
-		messagehelper.setSubject("Password Reset for RED WINGS");
+		messagehelper.setSubject("Password Reset for robotuni");
 		messagehelper.setText(content, true);
 		
 		mailSender.send(message);

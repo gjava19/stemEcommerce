@@ -110,7 +110,7 @@
 										<td th:text="${category.id}"></td>
 										<td th:text="${category.categoryName}"></td>
 										<td th:text="${category.isActive}"></td>
-										<td><img th:src="@{'/img/category/'+${category.categoryImage}}" width="50px" height="50px"></td>
+                                        <td><img th:src="@{'/uploads/' + ${category.categoryImage}}" width="50px" height="50px"></td>
 										<!-- <td th:text="${category.categoryImage}"></td> -->
 										<td th:text="${formattedDateTimeCreatedAt}"></td>
 										<td>

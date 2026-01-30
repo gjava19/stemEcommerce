@@ -1,6 +1,7 @@
 package com.mdtalalwasim.ecommerce.service.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.mdtalalwasim.ecommerce.controller.AdminViewController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -25,10 +27,12 @@ public class ProductServiceImpl implements ProductService{
 
 	@Autowired
 	ProductRepository productRepository;
-	
 
-	
-	@Override
+    @Autowired
+    private FileStorageService fileStorageService;
+
+
+    @Override
 	public Product saveProduct(Product product) {
 		// TODO Auto-generated method stub
 		return productRepository.save(product);
@@ -65,48 +69,35 @@ public class ProductServiceImpl implements ProductService{
 		return productRepository.findById(id).orElse(null);
 	}
 
-	@Override
-	public Product updateProductById(Product product, MultipartFile file) {
-		Product dbProductById = getProductById(product.getId());
-		
-		String imageName = file.isEmpty() ? dbProductById.getProductImage() : file.getOriginalFilename();
-		dbProductById.setProductImage(imageName);
-		dbProductById.setProductTitle(product.getProductTitle());
-		dbProductById.setProductDescription(product.getProductDescription());
-		dbProductById.setProductCategory(product.getProductCategory());
-		dbProductById.setProductPrice(product.getProductPrice());
-		dbProductById.setProductStock(product.getProductStock());
-		dbProductById.setCreatedAt(product.getCreatedAt());
-		dbProductById.setIsActive(product.getIsActive());
-		//discount logic
-		dbProductById.setDiscount(product.getDiscount());
-		Double discount =product.getProductPrice()*(product.getDiscount()/100.0);
-		Double discountPrice= product.getProductPrice() - discount;
-		dbProductById.setDiscountPrice(discountPrice);
-		
-		Product updatedProduct = productRepository.save(dbProductById);
-		
-		//product save then we need to save our new updated image
-		if(!ObjectUtils.isEmpty(updatedProduct)) {
-			if(!file.isEmpty()) {
-				try {
-					
-					File savefile = new ClassPathResource("static/img").getFile();
-					Path path = Paths.get(savefile.getAbsolutePath()+File.separator+"product_image"+File.separator+file.getOriginalFilename());
-					System.out.println("File save Path :"+path);
-					Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			
-			return updatedProduct;
-		}
-		return null;
-	}
+    @Override
+    public Product updateProductById(Product product, MultipartFile file) {
+        Product db = getProductById(product.getId());
 
-	@Override
+        if (file != null && !file.isEmpty()) {
+            try {
+                String path = fileStorageService.saveImage(file, "product_image"); // img/product_image/uuid.jpg
+                db.setProductImage(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        db.setProductTitle(product.getProductTitle());
+        db.setProductDescription(product.getProductDescription());
+        db.setProductCategory(product.getProductCategory());
+        db.setProductPrice(product.getProductPrice());
+        db.setProductStock(product.getProductStock());
+        db.setIsActive(product.getIsActive());
+
+        db.setDiscount(product.getDiscount());
+        Double discount = product.getProductPrice() * (product.getDiscount() / 100.0);
+        db.setDiscountPrice(product.getProductPrice() - discount);
+
+        return productRepository.save(db);
+    }
+
+
+    @Override
 	public List<Product> findAllActiveProducts(String category) {
 		List<Product> products = null;
 		if(ObjectUtils.isEmpty(category)) {

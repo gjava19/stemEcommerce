@@ -12,19 +12,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.datetime.DateFormatter;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.mdtalalwasim.ecommerce.entity.Category;
@@ -52,7 +49,10 @@ public class AdminViewController {
 	
 	@Autowired
 	CartService cartService;
-	
+
+    @Value("${app.upload.base-dir}")
+    private String baseDir;
+
 	//to track which user is login right Now
 	//by default call this method when any request come to this controller because of @ModelAttribut
 	@ModelAttribute 
@@ -90,40 +90,52 @@ public class AdminViewController {
 	}
 	
 	@PostMapping("/save-category")
-	public String saveCategory(@ModelAttribute Category category, @RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
-		
-		//String imageName = file !=null ? file.getOriginalFilename() : "default.jpg";
-        String imageName = (file != null && !file.isEmpty())
-                ? file.getOriginalFilename()
-                : "default.jpg";
+    public String saveCategory(@ModelAttribute Category category,
+                               @RequestParam("file") MultipartFile file,
+                               HttpSession session) throws IOException {
 
-        category.setCategoryImage(imageName);
-		
-		if(categoryService.existCategory(category.getCategoryName())) {
-			session.setAttribute("errorMsg", "Category Name already Exists");
-		}else {
-			Category saveCategory = categoryService.saveCategory(category);
-			
-			if(ObjectUtils.isEmpty(saveCategory)) {
-				session.setAttribute("errorMsg", "Not Saved! Internal Server Error!");
-			}else {
-				
-				File saveFile = new ClassPathResource("static/img").getFile();
-				Path path = Paths.get(saveFile.getAbsolutePath()+File.separator+"category"+File.separator+file.getOriginalFilename());
-				System.out.println("File save Path :"+path);
-				
-				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-				//set Suceesss Msg to Session
-				session.setAttribute("successMsg", "Category Save Successfully.");
-			}
-			
-		}
-		
-		
-		return "redirect:/admin/category";
-	}
+        if (categoryService.existCategory(category.getCategoryName())) {
+            session.setAttribute("errorMsg", "Category Name already Exists");
+            return "redirect:/admin/category";
+        }
 
-	@GetMapping("/category")
+        String imagePath = "img/category/default.jpg";
+
+        if (file != null && !file.isEmpty()) {
+            // create dir: baseDir/img/category
+            Path dir = Paths.get(baseDir, "img", "category");
+            Files.createDirectories(dir);
+
+            //_toggle safe filename_
+            String original = file.getOriginalFilename();
+            String ext = (original != null && original.contains("."))
+                    ? original.substring(original.lastIndexOf('.'))
+                    : "";
+
+            String filename = UUID.randomUUID() + ext;
+
+            // save to disk
+            Path target = dir.resolve(filename);
+            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+            // store in DB (relative path)
+            imagePath = "img/category/" + filename;
+        }
+
+        category.setCategoryImage(imagePath);
+
+        Category saved = categoryService.saveCategory(category);
+        if (ObjectUtils.isEmpty(saved)) {
+            session.setAttribute("errorMsg", "Not Saved! Internal Server Error!");
+        } else {
+            session.setAttribute("successMsg", "Category Save Successfully.");
+        }
+
+        return "redirect:/admin/category";
+    }
+
+
+    @GetMapping("/category")
 	public String category(Model model) {
 		System.out.println("category:WWWWWWWWW");
 		List<Category> allCategories = categoryService.getAllCategories();

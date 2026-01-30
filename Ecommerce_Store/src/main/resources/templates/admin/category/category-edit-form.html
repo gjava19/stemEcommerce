@@ -53,7 +53,7 @@
 									<label>Upload Image</label> <input type="file"
 										name="file" class="form-control">
 								</div>
-								<img alt="categoryImage" th:src="@{'/img/category/'+${category.categoryImage}}" width="100px" height="90px">
+                                <img alt="categoryImage" th:src="@{'/uploads/' + ${category.categoryImage}}" width="100px" height="90px">
 
 								<button class="btn btn-danger col-md-12 mt-3">Update</button>
 							</form>

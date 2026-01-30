@@ -11,13 +11,13 @@
 		<div id="carouselExample" class="carousel slide">
 			<div class="carousel-inner">
 				<div class="carousel-item active">
-					<img height="550px" src="/img/banner1.jpg" class="d-block w-100" alt="...">
+					<img height="550px" src="/img/banner1w.jpg" class="d-block w-100" alt="...">
 				</div>
 				<div class="carousel-item">
-					<img style="height:550px;" src="/img/banner2.jpg" class="d-block w-100" alt="...">
+					<img style="height:550px;" src="/img/banner2w.jpg" class="d-block w-100" alt="...">
 				</div>
 				<div class="carousel-item">
-					<img style="height:550px;" src="/img/banner3.jpg" class="d-block w-100" alt="...">
+					<img style="height:550px;" src="/img/banner3w.jpg" class="d-block w-100" alt="...">
 				</div>
 			</div>
 			<button class="carousel-control-prev" type="button"
@@ -235,7 +235,7 @@
 				<div class="col-md-3" th:each="product: ${latestEightActiveProducts}">
 				<div class="card shadow-sm p-3 mb-5 bg-white rounded">
 					<div class="card-body text-center">
-						<img alt="" th:src="@{'/img/product_image/'+${product.productImage}}" width="60%"
+						<img alt="" th:src="@{'/uploads/'+${product.productImage}}" width="60%"
 							height="140px">
 						<p class="text-center"><b>[[${product.productTitle}]]</b></p>
 					</div>
